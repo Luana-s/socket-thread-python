@@ -21,19 +21,8 @@ def main():
     thread2.start()
 
 
-#recebe as mensagens enviadas dos clientes
-def receberMensagens(cliente):
-    while True:
-        try:
-            msg = cliente.recv(2048).decode('utf-8')
-            print(msg+'\n')
-        except:
-            print('\nNão foi possível permanecer conectado no servidor!\n')
-            print('Pressione <Enter> Para continuar...')
-            cliente.close()
-            break
 
-
+#envia mensagens 
 def enviarMensagens(cliente, username):
     mensagens = []
     while True:
@@ -45,10 +34,8 @@ def enviarMensagens(cliente, username):
                 obj = json.loads(entrada)
             except json.JSONDecodeError:
                 print('A entrada deve ser um objeto JSON válido!')
-                cliente.send('400 - Não encontrado'.encode('utf-8'))
-
-           
-                
+                print('400 - solicitacao invalida')
+ 
                 continue
             nome = obj.get('id')
             msg = obj.get('msg')
@@ -57,7 +44,7 @@ def enviarMensagens(cliente, username):
                 continue
             print(f'Mensagem enviada: {msg}')
             print('\n')
-            cliente.send("200- Requisição bem sucedida".encode('utf-8'))
+            print("200- Requisição bem sucedida")
             cliente.send(f'<{username}> {msg}'.encode('utf-8'))
             
             mensagens.append(msg)
@@ -71,7 +58,17 @@ def enviarMensagens(cliente, username):
             print('Opção inválida!')
 
             
-
+#recebe as mensagens enviadas dos clientes
+def receberMensagens(cliente):
+    while True:
+        try:
+            msg = cliente.recv(2048).decode('utf-8')
+            print(msg+'\n')
+        except:
+            print('\nNão foi possível permanecer conectado no servidor!\n')
+            print('Pressione <Enter> Para continuar...')
+            cliente.close()
+            break
 
 
 

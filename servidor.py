@@ -11,7 +11,7 @@ clients = []
 
 
 def conexao():
-
+     #iniciando o servidor
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(('localhost', 8000))
     server.listen(1)
@@ -62,7 +62,7 @@ def usuarioBloqueado(usuario):
     print(res)
     return usuario in login and login[usuario]
 
-
+#recebe as mensagens do cliente e transmite 
 def messagesTreatment(cliente):
     while True:
         try:
@@ -71,7 +71,8 @@ def messagesTreatment(cliente):
         except:
             deleteClient(cliente)
             break
-
+        
+#envia a mesagem para todos os clientes
 def broadcast(msg, cliente):
     for clientItem in clients:
         if clientItem != cliente:
