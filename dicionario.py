@@ -1,7 +1,8 @@
 login = {
     "Maria": "senha1",
     "Luana": "senha2",
-    "Jose": "senha3"
+    "Jose": "senha3",
+    "Joao":"senha4"
 }
 
 respostas={

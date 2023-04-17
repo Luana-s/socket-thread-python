@@ -20,44 +20,60 @@ def main():
     thread1.start()
     thread2.start()
 
-
-
-#envia mensagens 
 def enviarMensagens(cliente, username):
-    mensagens = []
+    #armazena as mensagens
+    mensagens_enviadas=[]
+    
     while True:
+        print('\n\n\n\n')
         opcao = input('Digite "e" para enviar uma mensagem, ou "s" para sair: ')
         if opcao == 'e':
-            # enviar mensagem
+            
+            print('\n')
+            # enviar mensagem em formato Json
             entrada = input('Digite um id e uma mensagem em formato JSON (ex: {"id": 1, "msg": "Hello world!"}): ')
             try:
                 obj = json.loads(entrada)
             except json.JSONDecodeError:
                 print('A entrada deve ser um objeto JSON válido!')
-                print('400 - solicitacao invalida')
- 
+                print('400 - Solicitação inválida')
                 continue
-            nome = obj.get('id')
+            
+            id = obj.get('id')
+            
+            #verifica se o id nao é vazio
+            if id is None:
+                print('A entrada deve conter o campo "id"!')
+                continue
+            # verrifica se o id ja foi utilizado
+            if id in mensagens_enviadas:
+                print('\n')
+                print('O ID já foi usado em uma mensagem anterior!')
+                print('400 - Solicitação inválida')
+                continue
+            
             msg = obj.get('msg')
-            if nome is None or msg is None:
-                print('A entrada deve conter os campos "id" e "msg"!')
+            if msg is None:
+                print('A entrada deve conter o campo "msg"!')
                 continue
+            #retorna a mensagem enviada e o usuário que enviou
             print(f'Mensagem enviada: {msg}')
             print('\n')
             print("200- Requisição bem sucedida")
-            cliente.send(f'<{username}> {msg}'.encode('utf-8'))
+            cliente.send(f'\033[1;36m<{username}> {msg}\033[m\n'.encode('utf-8'))
             
-            mensagens.append(msg)
+            mensagens_enviadas.append(id)
+            
         
         elif opcao == 's':
             # sair
             break
         
         else:
-            # opção inválida
             print('Opção inválida!')
 
-            
+
+                    
 #recebe as mensagens enviadas dos clientes
 def receberMensagens(cliente):
     while True:

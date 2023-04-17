@@ -3,55 +3,53 @@ import socket
 from dicionario import login,respostas
 import socket
 
-# agora você pode utilizar o cliente para fazer a conexão e enviar/receber dados
 
 messages = []
 
 clients = []
-
+autenticados = {}
 
 def conexao():
      #iniciando o servidor
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(('localhost', 8000))
+     #servidor so aceita 1 conexao por vez
     server.listen(1)
 
     print("Servidor iniciado")
-
     while True:
-
         cliente, address = server.accept()
-        cliente.settimeout(10)
+        #cliente.settimeout(10)
         username = cliente.recv(1024).decode()
         password = cliente.recv(1024).decode()
-       
-        #Autenticar login
+        
+        # Verifica se o usuário já está autenticado
+        if username in autenticados:
+            cliente.send("\033[1;31mVocê já fez login em outra sessão.\033[m\n".encode())
+            
+            continue
+
+    #Autenticar login
         if username in login and login[username] == password:
-
-            cliente.send(f"\033[1;36m{username} sua autenticação foi bem-sucedida  em {address}\033[m\n".encode())
+            autenticados[username] = password
+            cliente.send(f"\033[1;36m{username} sua autenticação foi bem-sucedida em {address}\033[m\n".encode())
             print(f"Conexão estabelecida com {username} em {address}")
-            
-            print("\n")
-            cliente.send(f'\nDigite sua mensagem para se comunicar com outras pessoas:'.encode())
-
-            res= respostas["200"]
-            print(res)
-            clients.append(cliente)
-            
-
-             #    
-            thread = threading.Thread(target=messagesTreatment, args=[cliente])
-            thread.start()
-
-
-
         else:
-            cliente.send("Unauthorized, " " Forneça credenciais válidas, ou você pode está bloqueado".encode())
             print(f"Tentativa de conexão falhou em {address}")
-            res= respostas["401"]
-            cliente.close()
+            cliente.send("\033[1;31mUnauthorized, " " Forneça credenciais válidas, ou você pode está bloqueado.\033[m\n".encode())
+            
+            
+        # adiciona o cliente à lista de clientes conectados
+        clients.append(cliente)
+
+        # cria uma nova thread para tratar as mensagens do cliente
+        thread = threading.Thread(target=messagesTreatment, args=(cliente,))
+        thread.start()
 
 
+    
+
+    
 
  # código para desconectar o usuário ou impedir que ele envie mensagens         
 def bloquearUsuario(usuario):
